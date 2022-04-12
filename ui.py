@@ -4,11 +4,8 @@ from time import sleep
 from random import randrange
 
 
-data = []
 df = pd.read_csv("data.csv")
-for index, row in df.iterrows():
-    data.append([row[1], row[2], int(row[3]), row[4]])
-
+data = [[row[1], row[2], int(row[3]), row[4]] for index, row in df.iterrows()]
 data.sort()
 
 # find neighbor points
@@ -65,31 +62,32 @@ def update_time(point_locs):
         point[2] += 1
         stat = point[3]
         # cure after 3 sec of infection
-        if stat == "r" and point[2] >= 3:
-            p = randrange(100)
-            # 95% chance to cure
-            if p < 95:
-                point[3] = "g"
-                point[2] = 0
-        # infect
-        elif stat == "r":
-            p = randrange(100)
-            # 95% chance to infect
-            if p < 95:
-                neighbors = find_neighbors(point[0], point[1], point_locs)
-                if neighbors:
-                    for ng in neighbors:
-                        ng_stat = ng[3]
-                        p2 = randrange(100)
-                        # 99% to infect
-                        if ng_stat == "b" and p2 < 99:
-                            ng[3] = "r"
-                            ng[2] = 0
-                        # 1% chance to infect cured people
-                        elif (p2 < 1) and ng_stat == "g":
-                            ng[3] = "r"
-                            ng[2] = 0
-
+        if stat == "r":
+            if point[2] >= 3:
+                p = randrange(100)
+                # 95% chance to cure
+                if p < 95:
+                    point[3] = "g"
+                    point[2] = 0
+            else:
+                p = randrange(100)
+                            # 95% chance to infect
+                if p < 95:
+                    if neighbors := find_neighbors(
+                        point[0], point[1], point_locs
+                    ):
+                        for ng in neighbors:
+                            ng_stat = ng[3]
+                            p2 = randrange(100)
+                                                    # 99% to infect
+                            if (
+                                ng_stat == "b"
+                                and p2 < 99
+                                or p2 < 1
+                                and ng_stat == "g"
+                            ):
+                                ng[3] = "r"
+                                ng[2] = 0
     draw_points(point_locs)
 
 
@@ -98,7 +96,7 @@ def update_time(point_locs):
 def main():
     draw_points(data)
     # Time to live
-    for t in range(20):
+    for _ in range(20):
         sleep(.1)
         update_time(data)
 
