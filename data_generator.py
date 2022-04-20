@@ -11,7 +11,7 @@ lanes = 1500
 Start = time.time()
 
 data_list = []
-for i in range(lanes):
+for _ in range(lanes):
     x = random.randint(0, 100000)
     y = random.randint(0, 100000)
     data_list.append([x, y, 0, "b"])
